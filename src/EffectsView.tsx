@@ -21,8 +21,6 @@ export const EffectsView = () => {
             return;
         }
 
-        console.error('WebGL  supported');
-
         function createShader(gl: WebGLRenderingContext, type: number, source: string) {
             const shader = gl.createShader(type);
             if (!shader) {
@@ -223,30 +221,6 @@ export const EffectsView = () => {
             return;
         }
 
-        function drawScene(
-            gl: WebGLRenderingContext,
-            program: WebGLProgram,
-            resolutionLocation: WebGLUniformLocation,
-            timeLocation: WebGLUniformLocation,
-            time: number,
-            framebuffer: WebGLFramebuffer | null,
-            positionBuffer: WebGLBuffer
-        ): void {
-            gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-            gl.useProgram(program);
-            gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
-            gl.uniform1f(timeLocation, time);
-        
-            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-            gl.clear(gl.COLOR_BUFFER_BIT);
-        
-            const positionLocation = gl.getAttribLocation(program, 'a_position');
-            gl.enableVertexAttribArray(positionLocation);
-            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-        }
-
         function render(time: number) {
             time *= 0.001; // convert to seconds
 
@@ -259,10 +233,38 @@ export const EffectsView = () => {
             // gl.uniform1f(osc1, controlSettings.oscillator1.value);    
 
             // Draw first program to framebuffer1
-            drawScene(gl, program1, resolutionLocation1, timeLocation1, time, framebuffer1.framebuffer, positionBuffer);
+            // drawScene(gl, program1, resolutionLocation1, timeLocation1, time, framebuffer1.framebuffer, positionBuffer);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer1.framebuffer);
+            gl.useProgram(program1);
+            gl.uniform2f(resolutionLocation1, gl.canvas.width, gl.canvas.height);
+            gl.uniform1f(timeLocation1, time);
+        
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        
+            var positionLocation = gl.getAttribLocation(program1, 'a_position');
+            gl.enableVertexAttribArray(positionLocation);
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
 
             // Draw second program to framebuffer2
-            drawScene(gl, program2, resolutionLocation2, timeLocation2, time, framebuffer2.framebuffer, positionBuffer);
+            // drawScene(gl, program2, resolutionLocation2, timeLocation2, time, framebuffer2.framebuffer, positionBuffer);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer2.framebuffer);
+            gl.useProgram(program2);
+            gl.uniform2f(resolutionLocation2, gl.canvas.width, gl.canvas.height);
+            gl.uniform1f(timeLocation2, time);
+        
+            gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+        
+            positionLocation = gl.getAttribLocation(program2, 'a_position');
+            gl.enableVertexAttribArray(positionLocation);
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
 
             // Final pass: blend the two textures
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -278,7 +280,7 @@ export const EffectsView = () => {
             gl.bindTexture(gl.TEXTURE_2D, framebuffer2.texture);
             gl.uniform1i(texture2Location, 1);
 
-            const positionLocation = gl.getAttribLocation(programFinal, 'a_position');
+            positionLocation = gl.getAttribLocation(programFinal, 'a_position');
             gl.enableVertexAttribArray(positionLocation);
             gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
             gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
