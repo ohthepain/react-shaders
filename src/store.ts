@@ -6,6 +6,7 @@ export class OscillatorSettings {
     volume: number;
     type: OscillatorType;
     color: string;
+    sharpen: number = 1;
 
     constructor(frequency: number, speed: number, volume: number, type: OscillatorType, color: string) {
         this.frequency = frequency;
@@ -38,6 +39,8 @@ interface AppState {
     setFrequency2: (frequency: number) => void;
     setSpeed1: (frequency: number) => void;
     setSpeed2: (frequency: number) => void;
+    setSharpen1: (sharpen: number) => void;
+    setSharpen2: (sharpen: number) => void;
     toggleShowControls: () => void;
 }
 
@@ -52,6 +55,8 @@ export const useStore = create<AppState>((set) => ({
     setFrequency2: (frequency: number) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator2: { ...state.controlSettings.oscillator2, frequency: frequency }} })),
     setSpeed1: (speed: number) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator1: { ...state.controlSettings.oscillator1, speed: speed }} })),
     setSpeed2: (speed: number) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator2: { ...state.controlSettings.oscillator2, speed: speed }} })),
+    setSharpen1: (sharpen: number) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator1: { ...state.controlSettings.oscillator1, sharpen: sharpen }} })),
+    setSharpen2: (sharpen: number) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator2: { ...state.controlSettings.oscillator2, sharpen: sharpen }} })),
     setControlSettings: (settings: ControlSettings) => set({ controlSettings: settings }),
     toggleShowControls: () => set((state) => ({ showControls: !state.showControls })),
 }));
