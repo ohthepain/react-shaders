@@ -4,7 +4,7 @@ import { EffectsView } from './EffectsView';
 import { ControlPanel } from './ControlPanel';
 
 export const App = () => {
-    const { showControls, toggleShowControls } = useStore();
+    const { showControls, toggleShowControls, controlSettings } = useStore();
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -28,7 +28,7 @@ export const App = () => {
     return (
         <div className="flex-col h-full w-full">
             <div className="relative flex justify-center items-center h-full w-full">
-                <EffectsView />
+                <EffectsView controlSettingsParm={controlSettings}/>
                 {showControls && (
                     <ControlPanel />
                 )}

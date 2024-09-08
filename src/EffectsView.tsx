@@ -1,13 +1,15 @@
 import { useRef, useEffect } from 'react';
-import { useStore } from './store';
+import { ControlSettings } from './store';
 
-export const EffectsView = () => {
+export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: ControlSettings }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const { controlSettings } = useStore();
+    const controlSettingsRef = useRef(controlSettingsParm);
+    // console.log(`EffectsView: balance ${controlSettingsRef.current.balance} from ${controlSettings.balance}`);
 
     useEffect(() => {
-        console.log('controlSettings changed');
-    }, [controlSettings]);
+        console.log(`EffectsView: controlSettings ${controlSettingsParm.oscillator1.color.substring(1,3)} ${controlSettingsParm.oscillator1.color.substring(3,5)} ${controlSettingsParm.oscillator1.color.substring(5,7)}`);
+        controlSettingsRef.current = controlSettingsParm;
+    }, [controlSettingsParm]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -94,14 +96,15 @@ export const EffectsView = () => {
 
         const fragmentShaderSource1 = `
             precision mediump float;
+            uniform vec3 u_color1;
             uniform vec2 u_resolution;
             uniform float u_time;
             void main() {
                 vec2 st = gl_FragCoord.xy / u_resolution;
-                st = st * 2.0;
+                st = st * 5.0;
                 float dist = length(st);
-                float color = 0.5 + 0.5 * cos(20.0 * dist - u_time);
-                gl_FragColor = vec4(color, 0, 0, 1.0);
+                float a = 0.5 + 0.5 * cos(20.0 * dist - u_time);
+                gl_FragColor = vec4(u_color1, a);
             }
         `;
 
@@ -127,14 +130,15 @@ export const EffectsView = () => {
 
         const fragmentShaderSource2 = `
             precision mediump float;
+            uniform vec3 u_color2;
             uniform vec2 u_resolution;
             uniform float u_time;
             void main() {
                 vec2 st = gl_FragCoord.xy / u_resolution;
                 st = st * -2.0 + 2.0;
                 float dist = length(st);
-                float color = 0.5 + 0.5 * cos(20.0 * dist - u_time);
-                gl_FragColor = vec4(0, color, 0, 1.0);
+                float a = 0.5 + 0.5 * cos(20.0 * dist - u_time);
+                gl_FragColor = vec4(u_color2, a);
             }
         `;
 
@@ -162,15 +166,17 @@ export const EffectsView = () => {
 
         const fragmentShaderSourceFinal = `
             precision mediump float;
+            uniform float u_balance;
             uniform sampler2D u_texture1;
             uniform sampler2D u_texture2;
             varying vec2 v_texCoord;
+
             void main() {
                 vec4 color1 = texture2D(u_texture1, v_texCoord);
                 vec4 color2 = texture2D(u_texture2, v_texCoord);
-                // gl_FragColor = mix(color1, color2, 0.5); // Simple blend
+                gl_FragColor = mix(color1, color2, u_balance); // Simple blend
                 // gl_FragColor = vec4(1.0) - (vec4(1.0) - color1) * (vec4(1.0) - color2);
-                gl_FragColor = vec4(max(color1[0], color2[0]), max(color1[1], color2[1]), max(color1[2], color2[2]), 1.0);
+                // gl_FragColor = vec4(max(color1[0], color2[0]), max(color1[1], color2[1]), max(color1[2], color2[2]), 1.0);
             }
         `;
 
@@ -217,7 +223,28 @@ export const EffectsView = () => {
         const texture1Location: WebGLUniformLocation | null = gl.getUniformLocation(programFinal, 'u_texture1');
         const texture2Location: WebGLUniformLocation | null = gl.getUniformLocation(programFinal, 'u_texture2');
         if (!resolutionLocation1 || !timeLocation1 || !resolutionLocation2 || !timeLocation2 || !texture1Location || !texture2Location) {
-            console.error('Error getting uniform locations');
+            console.error('Error getting uniform locations 0');
+            return;
+        }
+
+        // Get uniform locations
+        const balanceLocation = gl.getUniformLocation(programFinal, 'u_balance');
+        if (!balanceLocation) {
+            console.error('Error getting uniform locations balance');
+            return;
+        }
+
+        // Get uniform locations - osc 1
+        const color1Location = gl.getUniformLocation(program1, 'u_color1');
+        if (!color1Location) {
+            console.error('Error getting uniform locations osc 1');
+            return;
+        }
+
+        // Get uniform locations - osc 2
+        const color2Location = gl.getUniformLocation(program2, 'u_color2');
+        if (!color2Location) {
+            console.error('Error getting uniform locations osc 2');
             return;
         }
 
@@ -227,10 +254,6 @@ export const EffectsView = () => {
             if (!gl || !program1 || !program2 || !programFinal || !framebuffer1 || !framebuffer2 || !positionBuffer || !resolutionLocation1 || !timeLocation1 || !resolutionLocation2 || !timeLocation2 || !texture1Location || !texture2Location) {
                 return;
             }
-
-            // gl.uniform1f(osc1Hue, controlSettings.oscillator1.hue);
-            // gl.uniform1f(osc1Saturation, controlSettings.oscillator1.saturation);
-            // gl.uniform1f(osc1, controlSettings.oscillator1.value);    
 
             // Draw first program to framebuffer1
             // drawScene(gl, program1, resolutionLocation1, timeLocation1, time, framebuffer1.framebuffer, positionBuffer);
@@ -246,11 +269,17 @@ export const EffectsView = () => {
             gl.enableVertexAttribArray(positionLocation);
             gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
             gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+            // Set uniform values from controlSettings
+            const r1 = parseInt(controlSettingsRef.current.oscillator1.color.substring(1, 3), 16) / 255.0
+            const g1 = parseInt(controlSettingsRef.current.oscillator1.color.substring(3, 5), 16) / 255.0;
+            const b1 = parseInt(controlSettingsRef.current.oscillator1.color.substring(5, 7), 16) / 255.0;
+            gl.uniform3f(color1Location, r1, g1, b1);
+
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
 
             // Draw second program to framebuffer2
-            // drawScene(gl, program2, resolutionLocation2, timeLocation2, time, framebuffer2.framebuffer, positionBuffer);
             gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer2.framebuffer);
             gl.useProgram(program2);
             gl.uniform2f(resolutionLocation2, gl.canvas.width, gl.canvas.height);
@@ -263,6 +292,13 @@ export const EffectsView = () => {
             gl.enableVertexAttribArray(positionLocation);
             gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
             gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+            // Set uniform values from controlSettings
+            const r2 = parseInt(controlSettingsRef.current.oscillator2.color.substring(1, 3), 16) / 255.0
+            const g2 = parseInt(controlSettingsRef.current.oscillator2.color.substring(3, 5), 16) / 255.0;
+            const b2 = parseInt(controlSettingsRef.current.oscillator2.color.substring(5, 7), 16) / 255.0;
+            gl.uniform3f(color2Location, r2, g2, b2);
+
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
 
@@ -284,6 +320,9 @@ export const EffectsView = () => {
             gl.enableVertexAttribArray(positionLocation);
             gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
             gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+            gl.uniform1f(balanceLocation, controlSettingsRef.current.balance);
+
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
             requestAnimationFrame(render);
