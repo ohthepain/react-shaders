@@ -105,7 +105,7 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             uniform float u_time;
 
             void main() {
-                vec2 st = (gl_FragCoord.xy - u_center1) / u_resolution;
+                vec2 st = (gl_FragCoord.xy - u_center1 * abs(u_center1) - u_resolution / 2.0) / u_resolution;
                 st = st * u_freq1 * u_freq1;
                 float dist = length(st);
                 float a = 0.5 + 0.5 * cos(20.0 * dist - u_time * u_speed1 * u_freq1) * u_sharpen1 * u_sharpen1;
@@ -143,7 +143,7 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             uniform vec2 u_resolution;
             uniform float u_time;
             void main() {
-                vec2 st = (gl_FragCoord.xy - u_center2) / u_resolution;
+                vec2 st = (gl_FragCoord.xy - u_center2 * abs(u_center2) - u_resolution / 2.0) / u_resolution;
                 st = st * u_freq2 * u_freq2;
                 float dist = length(st);
                 float a = 0.5 + 0.5 * cos(20.0 * dist - u_time * u_speed2 * u_freq2) * u_sharpen2 * u_sharpen2;

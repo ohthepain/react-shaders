@@ -23,7 +23,7 @@ export class OscillatorSettings {
 export class ControlSettings {
     oscillator1: OscillatorSettings;
     oscillator2: OscillatorSettings;
-    balance: number = 0.0;
+    balance: number = 0.5;
     constructor(oscillator1: OscillatorSettings, oscillator2: OscillatorSettings) {
         this.oscillator1 = oscillator1;
         this.oscillator2 = oscillator2;
@@ -55,8 +55,8 @@ export const useStore = create<AppState>((set) => ({
     count: 0,
     showControls: true,
     controlSettings: new ControlSettings(
-        new OscillatorSettings(0.5, 1, 0.5, 'sine', "#ff0000", [0, 0]),
-        new OscillatorSettings(0.5, 1, 0.5, 'sine', "#00ff00", [1280, 1024])
+        new OscillatorSettings(1, 1, 1, 'sine', "#ff0000", [0, 0]),
+        new OscillatorSettings(1, 1, 1, 'sine', "#00ff00", [0, 0])
     ),
     setBalance: (balance: number) => set(produce((state: AppState) => {
         state.controlSettings.balance = balance;
