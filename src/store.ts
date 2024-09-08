@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { produce } from 'immer';
 
 export class OscillatorSettings {
     frequency: number;
@@ -7,13 +8,15 @@ export class OscillatorSettings {
     type: OscillatorType;
     color: string;
     sharpen: number = 1;
+    center: [number, number];
 
-    constructor(frequency: number, speed: number, volume: number, type: OscillatorType, color: string) {
+    constructor(frequency: number, speed: number, volume: number, type: OscillatorType, color: string, center: [number, number]) {
         this.frequency = frequency;
         this.speed = speed;
         this.volume = volume;
         this.type = type;
         this.color = color;
+        this.center = center;
     }
 }
 
@@ -37,26 +40,67 @@ interface AppState {
     setColor2: (color: string) => void;
     setFrequency1: (frequency: number) => void;
     setFrequency2: (frequency: number) => void;
-    setSpeed1: (frequency: number) => void;
-    setSpeed2: (frequency: number) => void;
+    setSpeed1: (speed: number) => void;
+    setSpeed2: (speed: number) => void;
     setSharpen1: (sharpen: number) => void;
     setSharpen2: (sharpen: number) => void;
+    setCenterX1: (centerX: number) => void;
+    setCenterY1: (centerY: number) => void;
+    setCenterX2: (centerX: number) => void;
+    setCenterY2: (centerY: number) => void;
     toggleShowControls: () => void;
 }
 
 export const useStore = create<AppState>((set) => ({
     count: 0,
     showControls: true,
-    controlSettings: new ControlSettings(new OscillatorSettings(0.5, 1, 0.5, 'sine', "#ff0000"), new OscillatorSettings(0.5, 1, 0.5, 'sine', "#00ff00")),
-    setBalance: (balance: number) => set((state) => ({ controlSettings: { ...state.controlSettings, balance: balance }})),
-    setColor1: (color: string) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator1: { ...state.controlSettings.oscillator1, color: color }}})),
-    setColor2: (color: string) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator2: { ...state.controlSettings.oscillator2, color: color }} })),
-    setFrequency1: (frequency: number) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator1: { ...state.controlSettings.oscillator1, frequency: frequency }} })),
-    setFrequency2: (frequency: number) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator2: { ...state.controlSettings.oscillator2, frequency: frequency }} })),
-    setSpeed1: (speed: number) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator1: { ...state.controlSettings.oscillator1, speed: speed }} })),
-    setSpeed2: (speed: number) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator2: { ...state.controlSettings.oscillator2, speed: speed }} })),
-    setSharpen1: (sharpen: number) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator1: { ...state.controlSettings.oscillator1, sharpen: sharpen }} })),
-    setSharpen2: (sharpen: number) => set((state) => ({ controlSettings: { ...state.controlSettings, oscillator2: { ...state.controlSettings.oscillator2, sharpen: sharpen }} })),
-    setControlSettings: (settings: ControlSettings) => set({ controlSettings: settings }),
-    toggleShowControls: () => set((state) => ({ showControls: !state.showControls })),
+    controlSettings: new ControlSettings(
+        new OscillatorSettings(0.5, 1, 0.5, 'sine', "#ff0000", [0, 0]),
+        new OscillatorSettings(0.5, 1, 0.5, 'sine', "#00ff00", [1280, 1024])
+    ),
+    setBalance: (balance: number) => set(produce((state: AppState) => {
+        state.controlSettings.balance = balance;
+    })),
+    setColor1: (color: string) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator1.color = color;
+    })),
+    setColor2: (color: string) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator2.color = color;
+    })),
+    setFrequency1: (frequency: number) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator1.frequency = frequency;
+    })),
+    setFrequency2: (frequency: number) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator2.frequency = frequency;
+    })),
+    setSpeed1: (speed: number) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator1.speed = speed;
+    })),
+    setSpeed2: (speed: number) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator2.speed = speed;
+    })),
+    setSharpen1: (sharpen: number) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator1.sharpen = sharpen;
+    })),
+    setSharpen2: (sharpen: number) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator2.sharpen = sharpen;
+    })),
+    setControlSettings: (settings: ControlSettings) => set(produce((state: AppState) => {
+        state.controlSettings = settings;
+    })),
+    toggleShowControls: () => set(produce((state: AppState) => {
+        state.showControls = !state.showControls;
+    })),
+    setCenterX1: (centerX: number) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator1.center[0] = centerX;
+    })),
+    setCenterY1: (centerY: number) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator1.center[1] = centerY;
+    })),
+    setCenterX2: (centerX: number) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator2.center[0] = centerX;
+    })),
+    setCenterY2: (centerY: number) => set(produce((state: AppState) => {
+        state.controlSettings.oscillator2.center[1] = centerY;
+    }))
 }));

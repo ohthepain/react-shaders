@@ -13,7 +13,11 @@ export const ControlPanel = () => {
         setSpeed1,
         setSpeed2,
         setSharpen1,
-        setSharpen2
+        setSharpen2,
+        setCenterX1,
+        setCenterY1,
+        setCenterX2,
+        setCenterY2
     } = useStore();
 
     return (
@@ -25,11 +29,15 @@ export const ControlPanel = () => {
         <Slider className="flex my-4" defaultValue={[controlSettings.oscillator1.frequency]} max={10.0} min={0.0} step={0.01} onValueChange={(value) => { setFrequency1(value[0]); }} />
         <Slider className="flex my-4" defaultValue={[controlSettings.oscillator1.speed]} max={30.0} min={0.0} step={0.01} onValueChange={(value) => { setSpeed1(value[0]); }} />
         <Slider className="flex my-4" defaultValue={[controlSettings.oscillator1.sharpen]} max={10.0} min={1.0} step={0.01} onValueChange={(value) => { setSharpen1(value[0]); }} />
+        <Slider className="flex my-4" defaultValue={[controlSettings.oscillator1.center[0]]} max={1280.0} min={0.0} step={0.01} onValueChange={(value) => { setCenterX1(value[0]); }} />
+        <Slider className="flex my-4" defaultValue={[controlSettings.oscillator1.center[1]]} max={1024.0} min={0.0} step={0.01} onValueChange={(value) => { setCenterY1(value[0]); }} />
         <div className='flex mt-4 my-2 w-full justify-center'>OSC 2</div>
         <HuePicker color={controlSettings.oscillator2.color} onChange={(color) => { setColor2(color.hex); }} />
         <Slider className="flex my-4" defaultValue={[controlSettings.oscillator2.frequency]} max={10.0} min={0.0} step={0.01} onValueChange={(value) => { setFrequency2(value[0]); }} />
         <Slider className="flex my-4" defaultValue={[controlSettings.oscillator2.speed]} max={30.0} min={0.0} step={0.01} onValueChange={(value) => { setSpeed2(value[0]); }} />
         <Slider className="flex my-4" defaultValue={[controlSettings.oscillator2.sharpen]} max={10.0} min={1.0} step={0.01} onValueChange={(value) => { setSharpen2(value[0]); }} />
+        <Slider className="flex my-4" defaultValue={[controlSettings.oscillator2.center[0]]} max={1280.0} min={0.0} step={0.01} onValueChange={(value) => { setCenterX2(value[0]); }} />
+        <Slider className="flex my-4" defaultValue={[controlSettings.oscillator2.center[1]]} max={1024.0} min={0.0} step={0.01} onValueChange={(value) => { setCenterY2(value[0]); }} />
     </div>
     )
 }

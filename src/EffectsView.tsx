@@ -100,10 +100,12 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             uniform float u_freq1;
             uniform float u_speed1;
             uniform float u_sharpen1;
+            uniform vec2 u_center1;
             uniform vec2 u_resolution;
             uniform float u_time;
+
             void main() {
-                vec2 st = vec2(gl_FragCoord.x, gl_FragCoord.y) / u_resolution;
+                vec2 st = (gl_FragCoord.xy - u_center1) / u_resolution;
                 st = st * u_freq1 * u_freq1;
                 float dist = length(st);
                 float a = 0.5 + 0.5 * cos(20.0 * dist - u_time * u_speed1 * u_freq1) * u_sharpen1 * u_sharpen1;
@@ -137,12 +139,12 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             uniform float u_freq2;
             uniform float u_speed2;
             uniform float u_sharpen2;
+            uniform vec2 u_center2;
             uniform vec2 u_resolution;
             uniform float u_time;
             void main() {
-                vec2 st = gl_FragCoord.xy / u_resolution;
-                // st = st * -2.0 + 2.0;
-                st = st * -u_freq2 + u_freq2;
+                vec2 st = (gl_FragCoord.xy - u_center2) / u_resolution;
+                st = st * u_freq2 * u_freq2;
                 float dist = length(st);
                 float a = 0.5 + 0.5 * cos(20.0 * dist - u_time * u_speed2 * u_freq2) * u_sharpen2 * u_sharpen2;
                 gl_FragColor = vec4(u_color2, a);
@@ -246,7 +248,8 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
         const freq1Location = gl.getUniformLocation(program1, 'u_freq1');
         const speed1Location = gl.getUniformLocation(program1, 'u_speed1');
         const sharpen1Location = gl.getUniformLocation(program1, 'u_sharpen1');
-        if (!color1Location || !freq1Location || !speed1Location || !sharpen1Location) {
+        const center1Location = gl.getUniformLocation(program1, 'u_center1');
+        if (!color1Location || !freq1Location || !speed1Location || !sharpen1Location || !center1Location) {
             console.error('Error getting uniform locations osc 1');
             return;
         }
@@ -256,7 +259,8 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
         const freq2Location = gl.getUniformLocation(program2, 'u_freq2');
         const speed2Location = gl.getUniformLocation(program2, 'u_speed2');
         const sharpen2Location = gl.getUniformLocation(program2, 'u_sharpen2');
-        if (!color2Location || !freq2Location || !speed2Location || !sharpen2Location) {
+        const center2Location = gl.getUniformLocation(program2, 'u_center2');
+        if (!color2Location || !freq2Location || !speed2Location || !sharpen2Location || !center2Location) {
             console.error('Error getting uniform locations osc 2');
             return;
         }
@@ -291,6 +295,7 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             gl.uniform1f(freq1Location, controlSettingsRef.current.oscillator1.frequency);
             gl.uniform1f(speed1Location, controlSettingsRef.current.oscillator1.speed);
             gl.uniform1f(sharpen1Location, controlSettingsRef.current.oscillator1.sharpen);
+            gl.uniform2fv(center1Location, controlSettingsRef.current.oscillator1.center);
 
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
@@ -317,6 +322,8 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             gl.uniform1f(freq2Location, controlSettingsRef.current.oscillator2.frequency);
             gl.uniform1f(speed2Location, controlSettingsRef.current.oscillator2.speed);
             gl.uniform1f(sharpen2Location, controlSettingsRef.current.oscillator2.sharpen);
+            console.log(`center2: ${controlSettingsRef.current.oscillator2.center}`);
+            gl.uniform2fv(center2Location, controlSettingsRef.current.oscillator2.center);
 
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
