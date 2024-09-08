@@ -7,7 +7,7 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
     // console.log(`EffectsView: balance ${controlSettingsRef.current.balance} from ${controlSettings.balance}`);
 
     useEffect(() => {
-        console.log(`EffectsView: controlSettings ${controlSettingsParm.oscillator1.color.substring(1,3)} ${controlSettingsParm.oscillator1.color.substring(3,5)} ${controlSettingsParm.oscillator1.color.substring(5,7)}`);
+        console.log(`EffectsView: controlSettings ${JSON.stringify(controlSettingsParm)}`);
         controlSettingsRef.current = controlSettingsParm;
     }, [controlSettingsParm]);
 
@@ -97,13 +97,15 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
         const fragmentShaderSource1 = `
             precision mediump float;
             uniform vec3 u_color1;
+            uniform float u_freq1;
+            uniform float u_speed1;
             uniform vec2 u_resolution;
             uniform float u_time;
             void main() {
                 vec2 st = gl_FragCoord.xy / u_resolution;
-                st = st * 5.0;
+                st = st * u_freq1;
                 float dist = length(st);
-                float a = 0.5 + 0.5 * cos(20.0 * dist - u_time);
+                float a = 0.5 + 0.5 * cos(20.0 * dist - u_time * u_speed1);
                 gl_FragColor = vec4(u_color1, a);
             }
         `;
@@ -131,13 +133,16 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
         const fragmentShaderSource2 = `
             precision mediump float;
             uniform vec3 u_color2;
+            uniform float u_freq2;
+            uniform float u_speed2;
             uniform vec2 u_resolution;
             uniform float u_time;
             void main() {
                 vec2 st = gl_FragCoord.xy / u_resolution;
-                st = st * -2.0 + 2.0;
+                // st = st * -2.0 + 2.0;
+                st = st * -u_freq2 + u_freq2;
                 float dist = length(st);
-                float a = 0.5 + 0.5 * cos(20.0 * dist - u_time);
+                float a = 0.5 + 0.5 * cos(20.0 * dist - u_time * u_speed2);
                 gl_FragColor = vec4(u_color2, a);
             }
         `;
@@ -236,14 +241,18 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
 
         // Get uniform locations - osc 1
         const color1Location = gl.getUniformLocation(program1, 'u_color1');
-        if (!color1Location) {
+        const freq1Location = gl.getUniformLocation(program1, 'u_freq1');
+        const speed1Location = gl.getUniformLocation(program1, 'u_speed1');
+        if (!color1Location || !freq1Location || !speed1Location) {
             console.error('Error getting uniform locations osc 1');
             return;
         }
 
         // Get uniform locations - osc 2
         const color2Location = gl.getUniformLocation(program2, 'u_color2');
-        if (!color2Location) {
+        const freq2Location = gl.getUniformLocation(program2, 'u_freq2');
+        const speed2Location = gl.getUniformLocation(program2, 'u_speed2');
+        if (!color2Location || !freq2Location || !speed2Location) {
             console.error('Error getting uniform locations osc 2');
             return;
         }
@@ -275,6 +284,8 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             const g1 = parseInt(controlSettingsRef.current.oscillator1.color.substring(3, 5), 16) / 255.0;
             const b1 = parseInt(controlSettingsRef.current.oscillator1.color.substring(5, 7), 16) / 255.0;
             gl.uniform3f(color1Location, r1, g1, b1);
+            gl.uniform1f(freq1Location, controlSettingsRef.current.oscillator1.frequency);
+            gl.uniform1f(speed1Location, controlSettingsRef.current.oscillator1.speed);
 
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
@@ -298,6 +309,8 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             const g2 = parseInt(controlSettingsRef.current.oscillator2.color.substring(3, 5), 16) / 255.0;
             const b2 = parseInt(controlSettingsRef.current.oscillator2.color.substring(5, 7), 16) / 255.0;
             gl.uniform3f(color2Location, r2, g2, b2);
+            gl.uniform1f(freq2Location, controlSettingsRef.current.oscillator2.frequency);
+            gl.uniform1f(speed2Location, controlSettingsRef.current.oscillator2.speed);
 
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
