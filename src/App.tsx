@@ -5,7 +5,7 @@ import { ControlPanel } from './ControlPanel';
 import { LfoPanel } from './LfoPanel';
 
 export const App = () => {
-    const { showControls, toggleShowControls, controlSettings, lfoSettings } = useStore();
+    const { showControls, toggleShowControls, controlSettings } = useStore();
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {

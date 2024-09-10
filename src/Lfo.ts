@@ -18,11 +18,6 @@ const computeLfoValue = (lfoSettings: LfoSettings, time: number): number => {
     }
 }
 
-// const getLfoValue = (lfoNum: number, time: number): number => {
-//     const lfoSettings = useStore.getState().lfoSettings[lfoNum];
-//     return computeLfoValue(lfoSettings, time);
-// }
-
 export const cacheLfoValues = (time: number): number[] => {
     const lfoSettings = useStore.getState().lfoSettings;
     // console.log(`cacheLfoValues: ${lfoSettings[0].type}`);

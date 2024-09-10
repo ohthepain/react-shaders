@@ -291,14 +291,14 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
             // Set uniform values from controlSettings
-            const r1 = parseInt(controlSettingsRef.current.oscillator1.color.substring(1, 3), 16) / 255.0
-            const g1 = parseInt(controlSettingsRef.current.oscillator1.color.substring(3, 5), 16) / 255.0;
-            const b1 = parseInt(controlSettingsRef.current.oscillator1.color.substring(5, 7), 16) / 255.0;
+            const r1 = parseInt(controlSettingsRef.current.oscillators[0].color.substring(1, 3), 16) / 255.0
+            const g1 = parseInt(controlSettingsRef.current.oscillators[0].color.substring(3, 5), 16) / 255.0;
+            const b1 = parseInt(controlSettingsRef.current.oscillators[0].color.substring(5, 7), 16) / 255.0;
             gl.uniform3f(color1Location, r1, g1, b1);
-            gl.uniform1f(freq1Location, controlSettingsRef.current.oscillator1.frequency);
-            gl.uniform1f(speed1Location, controlSettingsRef.current.oscillator1.speed);
-            gl.uniform1f(sharpen1Location, controlSettingsRef.current.oscillator1.sharpen * lfoValues[0]);
-            gl.uniform2fv(center1Location, controlSettingsRef.current.oscillator1.center);
+            gl.uniform1f(freq1Location, controlSettingsRef.current.oscillators[0].frequency);
+            gl.uniform1f(speed1Location, controlSettingsRef.current.oscillators[0].speed);
+            gl.uniform1f(sharpen1Location, controlSettingsRef.current.oscillators[0].sharpen * lfoValues[0]);
+            gl.uniform2fv(center1Location, controlSettingsRef.current.oscillators[0].center);
 
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
@@ -318,16 +318,16 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
             // Set uniform values from controlSettings
-            const r2 = parseInt(controlSettingsRef.current.oscillator2.color.substring(1, 3), 16) / 255.0
-            const g2 = parseInt(controlSettingsRef.current.oscillator2.color.substring(3, 5), 16) / 255.0;
-            const b2 = parseInt(controlSettingsRef.current.oscillator2.color.substring(5, 7), 16) / 255.0;
+            const r2 = parseInt(controlSettingsRef.current.oscillators[1].color.substring(1, 3), 16) / 255.0
+            const g2 = parseInt(controlSettingsRef.current.oscillators[1].color.substring(3, 5), 16) / 255.0;
+            const b2 = parseInt(controlSettingsRef.current.oscillators[1].color.substring(5, 7), 16) / 255.0;
             gl.uniform3f(color2Location, r2, g2, b2);
-            gl.uniform1f(freq2Location, controlSettingsRef.current.oscillator2.frequency);
-            gl.uniform1f(speed2Location, controlSettingsRef.current.oscillator2.speed);
-            gl.uniform1f(sharpen2Location, controlSettingsRef.current.oscillator2.sharpen);
+            gl.uniform1f(freq2Location, controlSettingsRef.current.oscillators[1].frequency);
+            gl.uniform1f(speed2Location, controlSettingsRef.current.oscillators[1].speed);
+            gl.uniform1f(sharpen2Location, controlSettingsRef.current.oscillators[1].sharpen);
             const updatedCenter: [number, number] = [
-                controlSettingsRef.current.oscillator2.center[0] + lfoValues[1] * 30,
-                controlSettingsRef.current.oscillator2.center[1] + lfoValues[2] * 30
+                controlSettingsRef.current.oscillators[1].center[0] + lfoValues[1] * 30,
+                controlSettingsRef.current.oscillators[1].center[1] + lfoValues[2] * 30
             ];
             gl.uniform2fv(center2Location, updatedCenter);
 

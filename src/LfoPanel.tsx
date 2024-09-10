@@ -1,4 +1,4 @@
-import { useStore, LfoSettings, LfoType } from './store';
+import { useStore, LfoType } from './store';
 import { Slider } from './components/ui/slider';
 
 interface LfoViewProps {
