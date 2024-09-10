@@ -2,9 +2,10 @@ import { useEffect } from 'react';
 import { useStore } from './store';
 import { EffectsView } from './EffectsView';
 import { ControlPanel } from './ControlPanel';
+import { LfoPanel } from './LfoPanel';
 
 export const App = () => {
-    const { showControls, toggleShowControls, controlSettings } = useStore();
+    const { showControls, toggleShowControls, controlSettings, lfoSettings } = useStore();
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -13,7 +14,6 @@ export const App = () => {
             }
             if (event.key === ' ') {
                 event.preventDefault();
-                console.log(`showControls: ${showControls}`);
                 toggleShowControls();
             }
         };
@@ -26,11 +26,14 @@ export const App = () => {
     }, []);
     
     return (
-        <div className="flex-col h-full w-full">
-            <div className="relative flex justify-center items-center h-full w-full">
+        <div className="flex-col w-full h-full">
+            <div className="relative flex items-center justify-center w-full h-full">
                 <EffectsView controlSettingsParm={controlSettings}/>
                 {showControls && (
-                    <ControlPanel />
+                    <>
+                        <ControlPanel />
+                        <LfoPanel />
+                    </>
                 )}
             </div>
         </div>

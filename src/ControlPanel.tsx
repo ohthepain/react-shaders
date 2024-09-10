@@ -1,11 +1,12 @@
+import { useEffect } from 'react';
 import { useStore } from './store';
 import { Slider } from './components/ui/slider';
 import { HuePicker } from 'react-color';
 
 export const ControlPanel = () => {
     const {
-        setBalance, 
         controlSettings,
+        setBalance, 
         setColor1,
         setColor2,
         setFrequency1,
@@ -20,6 +21,10 @@ export const ControlPanel = () => {
         setCenterY2
     } = useStore();
 
+    useEffect(() => {
+        console.log(`controlSettings: ${JSON.stringify(controlSettings)}`);
+    }, [controlSettings]);
+
     return (
     <div className="absolute top-0 left-0 p-2 m-4 bg-white bg-opacity-75 rounded shadow">
         <div className='flex justify-center w-full mt-4 mb-2'>Balance</div>
@@ -28,7 +33,7 @@ export const ControlPanel = () => {
         </div>
         <div className='flex justify-center w-full my-2 mt-4'>OSC 1</div>
         <div className="flex items-center row">
-            <HuePicker color={controlSettings.oscillator1.color} onChange={(color) => { console.log(color); setColor1(color.hex); }} />
+            <HuePicker color={controlSettings.oscillator1.color} onChange={(color) => { setColor1(color.hex); }} />
         </div>
         <div className="flex items-center row">
             <div className="flex w-16 mx-2">Freq</div>

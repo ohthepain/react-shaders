@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import { produce } from 'immer';
+import { produce, immerable } from 'immer';
 
 export class OscillatorSettings {
+    [immerable] = true;
     frequency: number;
     speed: number;
     volume: number;
@@ -21,6 +22,7 @@ export class OscillatorSettings {
 }
 
 export class ControlSettings {
+    [immerable] = true;
     oscillator1: OscillatorSettings;
     oscillator2: OscillatorSettings;
     balance: number = 0.5;
@@ -30,11 +32,36 @@ export class ControlSettings {
     }
 }
 
+// Define the LfoType enum
+export enum LfoType {
+    SINE = 'sine',
+    SQUARE = 'square',
+    TRIANGLE = 'triangle',
+    SAWTOOTH = 'sawtooth'
+}
+
+// Update the LfoSettings class to use the LfoType enum
+export class LfoSettings {
+    [immerable] = true;
+    id: number;
+    frequency: number;
+    type: LfoType;
+
+    constructor(id: number, frequency: number=0.1, type: LfoType= LfoType.SINE) {
+        this.id = id;
+        this.frequency = frequency;
+        this.type = type;
+    }
+}
+
 interface AppState {
     count: number;
     showControls: boolean;
     controlSettings: ControlSettings;
+    lfoSettings: LfoSettings[];
     setControlSettings: (settings: ControlSettings) => void;
+    setLfoType: (lfoNum: number, type: LfoType) => void;
+    setLfoFrequency: (lfoNum: number, frequency: number) => void;
     setBalance: (balance: number) => void;
     setColor1: (color: string) => void;
     setColor2: (color: string) => void;
@@ -58,6 +85,24 @@ export const useStore = create<AppState>((set) => ({
         new OscillatorSettings(1, 1, 1, 'sine', "#ff0000", [0, 0]),
         new OscillatorSettings(1, 1, 1, 'sine', "#00ff00", [0, 0])
     ),
+    lfoSettings: [
+        new LfoSettings(0, 0.33, LfoType.SINE),
+        new LfoSettings(1, 0.33, LfoType.SINE),
+        new LfoSettings(2, 0.33, LfoType.SAWTOOTH),
+        new LfoSettings(3, 0.33, LfoType.SAWTOOTH),
+        new LfoSettings(4, 0.33, LfoType.TRIANGLE),
+        new LfoSettings(5, 0.33, LfoType.TRIANGLE),
+        new LfoSettings(6, 0.33, LfoType.SQUARE),
+        new LfoSettings(7, 0.33, LfoType.SQUARE)
+    ],
+    setLfoFrequency: (lfoNum, frequency) => set(produce((state: AppState) => {
+        console.log(`store-setLfoFrequency: ${lfoNum} ${frequency}`);
+        state.lfoSettings[lfoNum].frequency = frequency;
+    })),
+    setLfoType: (lfoNum, type) => set(produce((state: AppState) => {
+        console.log(`store-setLfoType: ${lfoNum} ${type}`);
+        state.lfoSettings[lfoNum].type = type;
+    })),
     setBalance: (balance: number) => set(produce((state: AppState) => {
         state.controlSettings.balance = balance;
     })),

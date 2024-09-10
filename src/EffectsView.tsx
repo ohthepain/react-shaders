@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { ControlSettings } from './store';
+import { cacheLfoValues } from './Lfo';
 
 export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: ControlSettings }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -185,7 +186,7 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
                 vec4 color2 = texture2D(u_texture2, v_texCoord);
                 gl_FragColor = mix(color1, color2, u_balance); // Simple blend
                 // gl_FragColor = vec4(1.0) - (vec4(1.0) - color1) * (vec4(1.0) - color2);
-                // gl_FragColor = vec4(max(color1[0], color2[0]), max(color1[1], color2[1]), max(color1[2], color2[2]), 1.0);
+                // gl_FragColor = vec4(max(color1[0], color2[0]), max(color1[1], color2[1]), max(color1[2], color2[2]), u_balance);
             }
         `;
 
@@ -272,6 +273,8 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
                 return;
             }
 
+            const lfoValues: number[] = cacheLfoValues(time);
+
             // Draw first program to framebuffer1
             // drawScene(gl, program1, resolutionLocation1, timeLocation1, time, framebuffer1.framebuffer, positionBuffer);
             gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer1.framebuffer);
@@ -294,7 +297,7 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             gl.uniform3f(color1Location, r1, g1, b1);
             gl.uniform1f(freq1Location, controlSettingsRef.current.oscillator1.frequency);
             gl.uniform1f(speed1Location, controlSettingsRef.current.oscillator1.speed);
-            gl.uniform1f(sharpen1Location, controlSettingsRef.current.oscillator1.sharpen);
+            gl.uniform1f(sharpen1Location, controlSettingsRef.current.oscillator1.sharpen * lfoValues[0]);
             gl.uniform2fv(center1Location, controlSettingsRef.current.oscillator1.center);
 
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -322,8 +325,11 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             gl.uniform1f(freq2Location, controlSettingsRef.current.oscillator2.frequency);
             gl.uniform1f(speed2Location, controlSettingsRef.current.oscillator2.speed);
             gl.uniform1f(sharpen2Location, controlSettingsRef.current.oscillator2.sharpen);
-            console.log(`center2: ${controlSettingsRef.current.oscillator2.center}`);
-            gl.uniform2fv(center2Location, controlSettingsRef.current.oscillator2.center);
+            const updatedCenter: [number, number] = [
+                controlSettingsRef.current.oscillator2.center[0] + lfoValues[1] * 30,
+                controlSettingsRef.current.oscillator2.center[1] + lfoValues[2] * 30
+            ];
+            gl.uniform2fv(center2Location, updatedCenter);
 
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
