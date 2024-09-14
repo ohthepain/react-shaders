@@ -5,7 +5,7 @@ import { ControlPanel } from './ControlPanel';
 import { LfoPanel } from './LfoPanel';
 
 export const App = () => {
-    const { showControls, toggleShowControls, controlSettings } = useStore();
+    const { showControls, toggleShowControls, controllerValues } = useStore();
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -28,7 +28,7 @@ export const App = () => {
     return (
         <div className="flex-col w-full h-full">
             <div className="relative flex items-center justify-center w-full h-full">
-                <EffectsView controlSettingsParm={controlSettings}/>
+                <EffectsView controlSettingsParm={controllerValues}/>
                 {showControls && (
                     <>
                         <ControlPanel />

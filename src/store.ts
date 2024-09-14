@@ -1,23 +1,30 @@
 import { create } from 'zustand';
 import { produce, immerable } from 'immer';
+import { controllerInfo, ControllerId } from './Modulation';
+
+export class ModulationSettings {
+    [immerable] = true;
+    lfoId: number;
+    amount: number;
+
+    constructor(lfoId: number, amount: number) {
+        this.lfoId = lfoId;
+        this.amount = amount;
+    }
+}
 
 export class OscillatorSettings {
     [immerable] = true;
-    frequency: number;
-    speed: number;
-    volume: number;
     type: OscillatorType;
     color: string;
-    sharpen: number = 1;
     center: [number, number];
+    controllers: number[];
 
-    constructor(frequency: number, speed: number, volume: number, type: OscillatorType, color: string, center: [number, number]) {
-        this.frequency = frequency;
-        this.speed = speed;
-        this.volume = volume;
+    constructor(type: OscillatorType, color: string, center: [number, number], controllers: number[]) {
         this.type = type;
         this.color = color;
         this.center = center;
+        this.controllers = [...controllers];
     }
 }
 
@@ -38,7 +45,6 @@ export enum LfoType {
     SAWTOOTH = 'sawtooth'
 }
 
-// Update the LfoSettings class to use the LfoType enum
 export class LfoSettings {
     [immerable] = true;
     id: number;
@@ -55,37 +61,36 @@ export class LfoSettings {
 interface AppState {
     count: number;
     showControls: boolean;
-    controlSettings: ControlSettings;
+    controllerValues: ControlSettings;
     lfoSettings: LfoSettings[];
+
+    toggleShowControls: () => void;
     setControlSettings: (settings: ControlSettings) => void;
     setLfoType: (lfoNum: number, type: LfoType) => void;
     setLfoFrequency: (lfoNum: number, frequency: number) => void;
     setBalance: (balance: number) => void;
     setColor: (oscId: number, color: string) => void;
-    setFrequency: (oscId: number, frequency: number) => void;
-    setSpeed: (oscId: number, speed: number) => void;
-    setSharpen: (oscId: number, sharpen: number) => void;
-    setCenterX: (oscId: number, centerX: number) => void;
-    setCenterY: (oscId: number, centerY: number) => void;
-    toggleShowControls: () => void;
+    setControllerValue: (oscId: number, controllerId: number, value: number) => void;
+    // Each controller has lfo id and amount
+}
+
+var defaultControllerValues: number[] = new Array(ControllerId.NumControllers); 
+for (var n = 0; n<ControllerId.NumControllers; n++) {
+    defaultControllerValues[n] = controllerInfo[n].defaultValue;
 }
 
 export const useStore = create<AppState>((set) => ({
     count: 0,
     showControls: true,
-    controlSettings: new ControlSettings([
-        new OscillatorSettings(1, 1, 1, 'sine', "#ff0000", [0, 0]),
-        new OscillatorSettings(1, 1, 1, 'sine', "#00ff00", [0, 0])
+    controllerValues: new ControlSettings([
+        new OscillatorSettings('sine', "#ff0000", [0, 0], defaultControllerValues),
+        new OscillatorSettings('sine', "#00ff00", [0, 0], defaultControllerValues)
     ]),
     lfoSettings: [
         new LfoSettings(0, 0.33, LfoType.SINE),
         new LfoSettings(1, 0.33, LfoType.SINE),
         new LfoSettings(2, 0.33, LfoType.SAWTOOTH),
-        new LfoSettings(3, 0.33, LfoType.SAWTOOTH),
-        new LfoSettings(4, 0.33, LfoType.TRIANGLE),
-        new LfoSettings(5, 0.33, LfoType.TRIANGLE),
-        new LfoSettings(6, 0.33, LfoType.SQUARE),
-        new LfoSettings(7, 0.33, LfoType.SQUARE)
+        new LfoSettings(3, 0.33, LfoType.SINE),
     ],
 
     toggleShowControls: () => set(produce((state: AppState) => {
@@ -100,27 +105,15 @@ export const useStore = create<AppState>((set) => ({
         state.lfoSettings[lfoNum].type = type;
     })),
     setBalance: (balance: number) => set(produce((state: AppState) => {
-        state.controlSettings.balance = balance;
+        state.controllerValues.balance = balance;
     })),
     setColor: (oscId: number, color: string) => set(produce((state: AppState) => {
-        state.controlSettings.oscillators[oscId].color = color;
-    })),
-    setFrequency: (oscId: number, frequency: number) => set(produce((state: AppState) => {
-        state.controlSettings.oscillators[oscId].frequency = frequency;
-    })),
-    setSpeed: (oscId: number, speed: number) => set(produce((state: AppState) => {
-        state.controlSettings.oscillators[oscId].speed = speed;
-    })),
-    setSharpen: (oscId: number, sharpen: number) => set(produce((state: AppState) => {
-        state.controlSettings.oscillators[oscId].sharpen = sharpen;
+        state.controllerValues.oscillators[oscId].color = color;
     })),
     setControlSettings: (settings: ControlSettings) => set(produce((state: AppState) => {
-        state.controlSettings = settings;
+        state.controllerValues = settings;
     })),
-    setCenterX: (oscId: number, centerX: number) => set(produce((state: AppState) => {
-        state.controlSettings.oscillators[oscId].center[0] = centerX;
-    })),
-    setCenterY: (oscId: number, centerY: number) => set(produce((state: AppState) => {
-        state.controlSettings.oscillators[oscId].center[1] = centerY;
+    setControllerValue: (oscId: number, controllerId: number, value: number) => set(produce((state: AppState) => {
+        state.controllerValues.oscillators[oscId].controllers[controllerId] = value;
     })),
 }));
