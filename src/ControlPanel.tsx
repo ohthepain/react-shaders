@@ -45,14 +45,27 @@ interface OscillatorSettingsProps {
 const OscillatorSettings = ({ oscId }: OscillatorSettingsProps) => {
     const {
         controllerValues,
-        setColor,
+        setControllerValue
     } = useStore();
+
+    const colorString = (): string => {
+        const r = controllerValues.oscillators[oscId].controllers[ControllerId.R];
+        const g = controllerValues.oscillators[oscId].controllers[ControllerId.G];
+        const b = controllerValues.oscillators[oscId].controllers[ControllerId.B];
+        const toHex = (value: number) => Math.round(value * 255).toString(16).padStart(2, '0');
+        const s = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        return s;
+    };
 
     return (
         <>
         <div className='flex justify-center w-full my-2 mt-4'>OSC 1</div>
         <div className="flex items-center row">
-            <HuePicker color={controllerValues.oscillators[oscId].color} onChange={(color) => { setColor(oscId, color.hex); }} />
+            <HuePicker color={colorString()} onChange={(color) => { 
+                setControllerValue(oscId, ControllerId.R, color.rgb.r / 255);
+                setControllerValue(oscId, ControllerId.G, color.rgb.g / 255);
+                setControllerValue(oscId, ControllerId.B, color.rgb.b / 255);
+            }} />
         </div>
         {Array.from({ length: ControllerId.NumControllers }, (_, id) => (
             <ControllerView key={id} oscId={oscId} controllerId={id} />

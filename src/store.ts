@@ -16,14 +16,10 @@ export class ModulationSettings {
 export class OscillatorSettings {
     [immerable] = true;
     type: OscillatorType;
-    color: string;
-    center: [number, number];
     controllers: number[];
 
-    constructor(type: OscillatorType, color: string, center: [number, number], controllers: number[]) {
+    constructor(type: OscillatorType, controllers: number[]) {
         this.type = type;
-        this.color = color;
-        this.center = center;
         this.controllers = [...controllers];
     }
 }
@@ -69,22 +65,18 @@ interface AppState {
     setLfoType: (lfoNum: number, type: LfoType) => void;
     setLfoFrequency: (lfoNum: number, frequency: number) => void;
     setBalance: (balance: number) => void;
-    setColor: (oscId: number, color: string) => void;
     setControllerValue: (oscId: number, controllerId: number, value: number) => void;
     // Each controller has lfo id and amount
 }
 
-var defaultControllerValues: number[] = new Array(ControllerId.NumControllers); 
-for (var n = 0; n<ControllerId.NumControllers; n++) {
-    defaultControllerValues[n] = controllerInfo[n].defaultValue;
-}
+const defaultControllerValues: number[] = controllerInfo.map(info => info.defaultValue);
 
 export const useStore = create<AppState>((set) => ({
     count: 0,
     showControls: true,
     controllerValues: new ControlSettings([
-        new OscillatorSettings('sine', "#ff0000", [0, 0], defaultControllerValues),
-        new OscillatorSettings('sine', "#00ff00", [0, 0], defaultControllerValues)
+        new OscillatorSettings('sine', defaultControllerValues),
+        new OscillatorSettings('sine', defaultControllerValues)
     ]),
     lfoSettings: [
         new LfoSettings(0, 0.33, LfoType.SINE),
@@ -106,9 +98,6 @@ export const useStore = create<AppState>((set) => ({
     })),
     setBalance: (balance: number) => set(produce((state: AppState) => {
         state.controllerValues.balance = balance;
-    })),
-    setColor: (oscId: number, color: string) => set(produce((state: AppState) => {
-        state.controllerValues.oscillators[oscId].color = color;
     })),
     setControlSettings: (settings: ControlSettings) => set(produce((state: AppState) => {
         state.controllerValues = settings;

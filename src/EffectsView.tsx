@@ -291,17 +291,17 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
             gl.clear(gl.COLOR_BUFFER_BIT);
         
-            var positionLocation = gl.getAttribLocation(program1, 'a_position');
+            let positionLocation = gl.getAttribLocation(program1, 'a_position');
             gl.enableVertexAttribArray(positionLocation);
             gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
             gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
             // Set uniform values from controlSettings
-            const r1 = parseInt(controlSettingsRef.current.oscillators[0].color.substring(1, 3), 16) / 255.0
-            const g1 = parseInt(controlSettingsRef.current.oscillators[0].color.substring(3, 5), 16) / 255.0;
-            const b1 = parseInt(controlSettingsRef.current.oscillators[0].color.substring(5, 7), 16) / 255.0;
+            const r1 = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.R]
+            const g1 = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.G]
+            const b1 = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.B]
             gl.uniform3f(color1Location, r1, g1, b1);
-            var controllerValue = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.Freq];
+            let controllerValue = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.Freq];
             gl.uniform1f(freq1Location, controllerValue);
             controllerValue = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.Speed];
             gl.uniform1f(speed1Location, controllerValue);
@@ -309,7 +309,7 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             controllerValue = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.Sharp] * lfoValues[0];
             gl.uniform1f(sharpen1Location, controllerValue);
 
-            var updatedCenter: [number, number] = [
+            let updatedCenter: [number, number] = [
                 useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.X],
                 useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.Y]
             ];
@@ -333,9 +333,9 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
             // Set uniform values from controlSettings
-            const r2 = parseInt(controlSettingsRef.current.oscillators[1].color.substring(1, 3), 16) / 255.0
-            const g2 = parseInt(controlSettingsRef.current.oscillators[1].color.substring(3, 5), 16) / 255.0;
-            const b2 = parseInt(controlSettingsRef.current.oscillators[1].color.substring(5, 7), 16) / 255.0;
+            const r2 = useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.R]
+            const g2 = useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.G]
+            const b2 = useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.B]
             gl.uniform3f(color2Location, r2, g2, b2);
             controllerValue = useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.Freq];
             gl.uniform1f(freq2Location, controllerValue);
