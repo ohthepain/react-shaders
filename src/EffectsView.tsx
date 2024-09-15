@@ -185,11 +185,27 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             varying vec2 v_texCoord;
 
             void main() {
-                vec4 color1 = texture2D(u_texture1, v_texCoord);
-                vec4 color2 = texture2D(u_texture2, v_texCoord);
-                gl_FragColor = mix(color1, color2, u_balance); // Simple blend
+                // vec4 color1 = texture2D(u_texture1, v_texCoord);
+                // vec4 color2 = texture2D(u_texture2, v_texCoord);
+                // gl_FragColor = mix(color1, color2, u_balance); // Simple blend
                 // gl_FragColor = vec4(1.0) - (vec4(1.0) - color1) * (vec4(1.0) - color2);
                 // gl_FragColor = vec4(max(color1[0], color2[0]), max(color1[1], color2[1]), max(color1[2], color2[2]), u_balance);
+                vec4 color1 = texture2D(u_texture1, v_texCoord);
+                vec4 color2 = texture2D(u_texture2, v_texCoord);
+
+                // Pre-multiply the colors by their alpha values
+                vec4 premultipliedColor1 = vec4(color1.rgb * color1.a, color1.a);
+                vec4 premultipliedColor2 = vec4(color2.rgb * color2.a, color2.a);
+
+                // Blend the pre-multiplied colors
+                vec4 blendedColor = mix(premultipliedColor1, premultipliedColor2, u_balance);
+
+                // Un-premultiply the blended color
+                if (blendedColor.a > 0.0) {
+                    blendedColor.rgb /= blendedColor.a;
+                }
+
+                gl_FragColor = blendedColor;
             }
         `;
 
