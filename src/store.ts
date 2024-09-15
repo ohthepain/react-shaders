@@ -17,10 +17,12 @@ export class OscillatorSettings {
     [immerable] = true;
     type: OscillatorType;
     controllers: number[];
+    modulationSettings: ModulationSettings[];
 
     constructor(type: OscillatorType, controllers: number[]) {
         this.type = type;
         this.controllers = [...controllers];
+        this.modulationSettings = Array.from({ length: ControllerId.NumControllers }, () => new ModulationSettings(-1, 0));
     }
 }
 
@@ -66,7 +68,8 @@ interface AppState {
     setLfoFrequency: (lfoNum: number, frequency: number) => void;
     setBalance: (balance: number) => void;
     setControllerValue: (oscId: number, controllerId: number, value: number) => void;
-    // Each controller has lfo id and amount
+    setLfoId: (oscId: number, controllerId: number, lfoId: number) => void;
+    setLfoAmount: (oscId: number, controllerId: number, amount: number) => void;
 }
 
 const defaultControllerValues: number[] = controllerInfo.map(info => info.defaultValue);
@@ -104,5 +107,11 @@ export const useStore = create<AppState>((set) => ({
     })),
     setControllerValue: (oscId: number, controllerId: number, value: number) => set(produce((state: AppState) => {
         state.controllerValues.oscillators[oscId].controllers[controllerId] = value;
+    })),
+    setLfoId: (oscId: number, controllerId: number, lfoId: number) => set(produce((state: AppState) => {
+        state.controllerValues.oscillators[oscId].modulationSettings[controllerId].lfoId = lfoId;
+    })),
+    setLfoAmount: (oscId: number, controllerId: number, amount: number) => set(produce((state: AppState) => {
+        state.controllerValues.oscillators[oscId].modulationSettings[controllerId].amount = amount;
     })),
 }));

@@ -2,21 +2,18 @@ import { useRef, useEffect } from 'react';
 import { ControlSettings } from './store';
 import { cacheLfoValues } from './Lfo';
 import { useStore } from './store';
-import { ControllerId } from './Modulation';
+import { ControllerId, controllerInfo } from './Modulation';
 
 export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: ControlSettings }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const controlSettingsRef = useRef(controlSettingsParm);
-    const { controllerValues } = useStore();
+
+    var cachedLfoValues: number[] = cacheLfoValues(0);
 
     useEffect(() => {
         console.log(`EffectsView: controlSettings ${JSON.stringify(controlSettingsParm)}`);
         controlSettingsRef.current = controlSettingsParm;
     }, [controlSettingsParm]);
-
-    useEffect(() => {
-        console.log(`EffectsView: controllerValues ${JSON.stringify(controllerValues)}`);
-    }, [controllerValues]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -272,6 +269,28 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             return;
         }
 
+        const getControllerValue = (oscId: number, controllerId: number): number => {
+            const oscillator = useStore.getState().controllerValues.oscillators[oscId];
+            let value = oscillator.controllers[controllerId];
+            if (oscillator.modulationSettings[controllerId].lfoId != -1) {
+                const lfoId = oscillator.modulationSettings[controllerId].lfoId;
+                const lfoValue = cachedLfoValues[lfoId];
+                const lfoAmount = oscillator.modulationSettings[controllerId].amount
+                switch (controllerInfo[controllerId].transform) {
+                    case 'add':
+                        value = value + lfoValue * lfoAmount * (controllerInfo[controllerId].max - controllerInfo[controllerId].min);
+                        break;
+                    case 'multiply':
+                        value = value * (1 + lfoValue * lfoAmount);
+                        break;
+                    default:
+                        throw new Error('Unknown transform type');
+                }
+                return value;
+            }
+            return value;
+        }
+
         function render(time: number) {
             time *= 0.001; // convert to seconds
 
@@ -279,10 +298,9 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
                 return;
             }
 
-            const lfoValues: number[] = cacheLfoValues(time);
+            cachedLfoValues = cacheLfoValues(time);
 
             // Draw first program to framebuffer1
-            // drawScene(gl, program1, resolutionLocation1, timeLocation1, time, framebuffer1.framebuffer, positionBuffer);
             gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer1.framebuffer);
             gl.useProgram(program1);
             gl.uniform2f(resolutionLocation1, gl.canvas.width, gl.canvas.height);
@@ -297,23 +315,15 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
             // Set uniform values from controlSettings
-            const r1 = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.R]
-            const g1 = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.G]
-            const b1 = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.B]
+            const r1 = getControllerValue(0, ControllerId.R);
+            const g1 = getControllerValue(0, ControllerId.G);
+            const b1 = getControllerValue(0, ControllerId.B);
             gl.uniform3f(color1Location, r1, g1, b1);
-            let controllerValue = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.Freq];
+            let controllerValue = getControllerValue(0, ControllerId.Freq);
             gl.uniform1f(freq1Location, controllerValue);
-            controllerValue = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.Speed];
-            gl.uniform1f(speed1Location, controllerValue);
-
-            controllerValue = useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.Sharp] * lfoValues[0];
-            gl.uniform1f(sharpen1Location, controllerValue);
-
-            let updatedCenter: [number, number] = [
-                useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.X],
-                useStore.getState().controllerValues.oscillators[0].controllers[ControllerId.Y]
-            ];
-            gl.uniform2fv(center1Location, updatedCenter);
+            gl.uniform1f(speed1Location, getControllerValue(0, ControllerId.Speed));
+            gl.uniform1f(sharpen1Location, getControllerValue(0, ControllerId.Sharp)); // Set LFO 0 amount to 1
+            gl.uniform2fv(center1Location, [getControllerValue(0, ControllerId.X), getControllerValue(0, ControllerId.Y)]);
 
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
@@ -333,23 +343,19 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
             gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
 
             // Set uniform values from controlSettings
-            const r2 = useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.R]
-            const g2 = useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.G]
-            const b2 = useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.B]
-            gl.uniform3f(color2Location, r2, g2, b2);
-            controllerValue = useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.Freq];
-            gl.uniform1f(freq2Location, controllerValue);
-            controllerValue = useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.Speed];
-            gl.uniform1f(speed2Location, controllerValue);
+            gl.uniform3f(color2Location, getControllerValue(1, ControllerId.R),
+                getControllerValue(1, ControllerId.G),
+                getControllerValue(1, ControllerId.B));
+            gl.uniform1f(freq2Location, getControllerValue(1, ControllerId.Freq));
+            gl.uniform1f(speed2Location, getControllerValue(1, ControllerId.Speed));
+            gl.uniform1f(sharpen2Location, getControllerValue(1, ControllerId.Sharp));
+            gl.uniform2fv(center2Location, [getControllerValue(1, ControllerId.X), getControllerValue(1, ControllerId.Y)]);
 
-            controllerValue = useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.Sharp];
-            gl.uniform1f(sharpen2Location, controllerValue);
-
-            updatedCenter = [
-                useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.X] + lfoValues[1] * 30,
-                useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.Y] + lfoValues[2] * 30
-            ];
-            gl.uniform2fv(center2Location, updatedCenter);
+            // updatedCenter = [
+            //     useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.X] + cachedLfoValues[1] * 30,
+            //     useStore.getState().controllerValues.oscillators[1].controllers[ControllerId.Y] + cachedLfoValues[2] * 30
+            // ];
+            // gl.uniform2fv(center2Location, updatedCenter);
 
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
