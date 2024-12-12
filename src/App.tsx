@@ -5,37 +5,37 @@ import { ControlPanel } from './ControlPanel';
 import { LfoPanel } from './LfoPanel';
 
 export const App = () => {
-    const { showControls, toggleShowControls, patch } = useStore();
+	const { showControls, toggleShowControls, patch } = useStore();
 
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.repeat) {
-                return; // Ignore repeated keydown events in React STRICT MODE
-            }
-            if (event.key === ' ') {
-                event.preventDefault();
-                toggleShowControls();
-            }
-        };
+	useEffect(() => {
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.repeat) {
+				return; // Ignore repeated keydown events in React STRICT MODE
+			}
+			if (event.key === ' ') {
+				event.preventDefault();
+				toggleShowControls();
+			}
+		};
 
-        window.addEventListener('keydown', handleKeyDown);
+		window.addEventListener('keydown', handleKeyDown);
 
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, []);
-    
-    return (
-        <div className="flex-col w-full h-full">
-            <div className="relative flex items-center justify-center w-full h-full">
-                <EffectsView controlSettingsParm={patch.controllerValues}/>
-                {showControls && (
-                    <>
-                        <ControlPanel />
-                        <LfoPanel />
-                    </>
-                )}
-            </div>
-        </div>
-    );
+		return () => {
+			window.removeEventListener('keydown', handleKeyDown);
+		};
+	}, []);
+
+	return (
+		<div className="flex-col w-full h-full">
+			<div className="relative flex items-center justify-center w-full h-full">
+				<EffectsView controlSettingsParm={patch.controllerValues} />
+				{showControls && (
+					<>
+						<ControlPanel />
+						<LfoPanel />
+					</>
+				)}
+			</div>
+		</div>
+	);
 };
