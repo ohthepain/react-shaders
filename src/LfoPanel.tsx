@@ -6,8 +6,8 @@ interface LfoViewProps {
 }
 
 const LfoView = ({ id }: LfoViewProps) => {
-    const { setLfoType, setLfoFrequency, lfoSettings } = useStore();
-    const lfo = lfoSettings[id];
+    const { setLfoType, setLfoFrequency, patch } = useStore();
+    const lfo = patch.lfoSettings[id];
 
     const handleLfoFrequencyChange = (value: number[]) => {
         setLfoFrequency(id, value[0]);
@@ -50,7 +50,7 @@ const LfoView = ({ id }: LfoViewProps) => {
 };
 
 export const LfoPanel = () => {
-    const lfoSettings = useStore((state) => state.lfoSettings);
+    const lfoSettings = useStore((state) => state.patch.lfoSettings);
 
     return (
         <div className="absolute top-0 right-0 flex flex-col p-4 ">

@@ -12,7 +12,7 @@ interface ControllerProps {
 const ControllerView = ({ oscId, controllerId }: ControllerProps) => {
   const { setControllerValue, setLfoId, setLfoAmount } = useStore();
   const controller = controllerInfo[controllerId];
-  const oscillatorSettings = useStore((state) => state.controllerValues.oscillators[oscId]);
+  const oscillatorSettings = useStore((state) => state.patch.controllerValues.oscillators[oscId]);
   const [showLfoPanel, setShowLfoPanel] = useState(false);
 
   const handleValueChange = (values: number[]) => {
@@ -74,12 +74,12 @@ interface OscillatorSettingsProps {
 }
 
 const OscillatorSettings = ({ oscId }: OscillatorSettingsProps) => {
-  const { controllerValues, setControllerValue } = useStore();
+  const { patch, setControllerValue } = useStore();
 
   const colorString = (): string => {
-    const r = controllerValues.oscillators[oscId].controllers[ControllerId.R];
-    const g = controllerValues.oscillators[oscId].controllers[ControllerId.G];
-    const b = controllerValues.oscillators[oscId].controllers[ControllerId.B];
+    const r = patch.controllerValues.oscillators[oscId].controllers[ControllerId.R];
+    const g = patch.controllerValues.oscillators[oscId].controllers[ControllerId.G];
+    const b = patch.controllerValues.oscillators[oscId].controllers[ControllerId.B];
     const toHex = (value: number) =>
       Math.round(value * 255)
         .toString(16)
@@ -120,7 +120,7 @@ const ModulationSettingsPanel = ({
   onAmountChange,
 }: ModulationSettingsProps) => {
 
-    const { lfoSettings } = useStore();
+    const { patch } = useStore();
 
   const handleAmountChange = (value: number[]) => {
     onAmountChange(value[0]);
@@ -135,7 +135,7 @@ const ModulationSettingsPanel = ({
       <div className="flex justify-center w-16">
         <select value={modulationSettings.lfoId} onChange={handleLfoIdChange} className="bg-transparent">
         <option value={-1}>LFO ?</option>
-        {lfoSettings.map((lfoSetting) => (
+        {patch.lfoSettings.map((lfoSetting) => (
           <option value={lfoSetting.id}>LFO {lfoSetting.id}</option>
         ))}
         </select>
@@ -153,14 +153,14 @@ const ModulationSettingsPanel = ({
 };
 
 export const ControlPanel = () => {
-  const { controllerValues, setBalance } = useStore();
+  const { patch, setBalance } = useStore();
 
   return (
     <div className="absolute top-0 left-0 p-2 m-4 bg-white bg-opacity-75 rounded shadow">
       <div className="flex justify-center w-full mt-4 mb-2">Balance</div>
       <div className="flex items-center row">
         <Slider
-          defaultValue={[controllerValues.balance]}
+          defaultValue={[patch.controllerValues.balance]}
           max={1.0}
           min={0.0}
           step={0.01}

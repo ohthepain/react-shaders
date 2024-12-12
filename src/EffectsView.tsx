@@ -286,7 +286,7 @@ export const EffectsView = ({ controlSettingsParm }: { controlSettingsParm: Cont
         }
 
         const getControllerValue = (oscId: number, controllerId: number): number => {
-            const oscillator = useStore.getState().controllerValues.oscillators[oscId];
+            const oscillator = useStore.getState().patch.controllerValues.oscillators[oscId];
             let value = oscillator.controllers[controllerId];
             if (oscillator.modulationSettings[controllerId].lfoId != -1) {
                 const lfoId = oscillator.modulationSettings[controllerId].lfoId;

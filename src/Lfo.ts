@@ -19,7 +19,7 @@ const computeLfoValue = (lfoSettings: LfoSettings, time: number): number => {
 }
 
 export const cacheLfoValues = (time: number): number[] => {
-    const lfoSettings = useStore.getState().lfoSettings;
+    const lfoSettings = useStore.getState().patch.lfoSettings;
     // console.log(`cacheLfoValues: ${lfoSettings[0].type}`);
     const values: number[] = new Array(lfoSettings.length);
     for (let i = 0; i < lfoSettings.length; i++) {
